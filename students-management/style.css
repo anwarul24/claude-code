@@ -1,0 +1,270 @@
+/* ==========================================================================
+   Student Registry — Ledger Theme
+   Palette: navy #1B2A4A, gold #C9A227, parchment #F7F5F0,
+            slate #5B6472, success #2F6F4E, danger #B84C3E
+   Display: Space Grotesk | Body: Inter | Data/mono: IBM Plex Mono
+   ========================================================================== */
+
+:root {
+  --navy: #1B2A4A;
+  --navy-deep: #131F38;
+  --gold: #C9A227;
+  --gold-soft: #E8D28A;
+  --parchment: #F7F5F0;
+  --slate: #5B6472;
+  --success: #2F6F4E;
+  --danger: #B84C3E;
+  --line: #E4E0D6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--parchment);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--navy-deep);
+  min-height: 100vh;
+}
+
+/* ---------------- Header ---------------- */
+.registry-header {
+  background: linear-gradient(180deg, var(--navy) 0%, var(--navy-deep) 100%);
+  color: #fff;
+  border-bottom: 3px solid var(--gold);
+}
+
+.registry-mark {
+  width: 42px; height: 42px;
+  border: 2px solid var(--gold);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.registry-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.registry-subtitle {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.02em;
+}
+
+.stat-pill {
+  display: flex; align-items: baseline; gap: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(201,162,39,0.35);
+  border-radius: 999px;
+  padding: 6px 16px;
+}
+.stat-num {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--gold);
+}
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.65);
+}
+
+/* ---------------- Buttons ---------------- */
+.btn-gold {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--navy-deep);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.btn-gold:hover, .btn-gold:focus {
+  background: var(--gold-soft);
+  border-color: var(--gold-soft);
+  color: var(--navy-deep);
+}
+.btn-outline-navy {
+  border-color: var(--navy);
+  color: var(--navy);
+  background: transparent;
+  font-weight: 500;
+}
+.btn-outline-navy:hover {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* ---------------- Toolbar ---------------- */
+.toolbar { margin-top: 0.25rem; }
+
+.search-wrap {
+  position: relative;
+  min-width: 240px;
+}
+.search-icon {
+  position: absolute;
+  left: 14px; top: 50%;
+  transform: translateY(-50%);
+  color: var(--slate);
+}
+.search-input {
+  padding-left: 38px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.search-input:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 0.2rem rgba(201,162,39,0.18);
+}
+
+.sync-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--success);
+  display: inline-block;
+  box-shadow: 0 0 0 3px rgba(47,111,78,0.15);
+}
+.sync-dot.offline { background: var(--danger); box-shadow: 0 0 0 3px rgba(184,76,62,0.15); }
+
+/* ---------------- Ledger table ---------------- */
+.ledger-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(27,42,74,0.06);
+}
+
+.ledger-table { margin-bottom: 0; }
+.ledger-table thead th {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--slate);
+  background: var(--parchment);
+  border-bottom: 2px solid var(--line);
+  padding: 12px 14px;
+  font-weight: 600;
+}
+.ledger-table tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.ledger-table tbody tr:last-child td { border-bottom: none; }
+.ledger-table tbody tr:hover { background: rgba(201,162,39,0.05); }
+
+.student-name { font-weight: 600; color: var(--navy-deep); }
+.roll-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.82rem;
+  background: var(--navy);
+  color: var(--gold-soft);
+  padding: 2px 9px;
+  border-radius: 5px;
+  letter-spacing: 0.02em;
+}
+.class-tag {
+  font-size: 0.78rem;
+  color: var(--slate);
+  border: 1px solid var(--line);
+  padding: 2px 9px;
+  border-radius: 5px;
+  background: var(--parchment);
+}
+
+/* ID-card style avatar */
+.id-avatar {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  object-fit: cover;
+  border: 2px solid var(--line);
+  background: var(--parchment);
+}
+.id-avatar-placeholder {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  border: 2px dashed var(--line);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--slate);
+  background: var(--parchment);
+  font-size: 1.1rem;
+}
+
+.action-btn {
+  border: none;
+  background: transparent;
+  color: var(--slate);
+  width: 32px; height: 32px;
+  border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.15s ease;
+}
+.action-btn:hover { background: var(--parchment); color: var(--navy); }
+.action-btn.danger:hover { background: rgba(184,76,62,0.1); color: var(--danger); }
+
+/* ---------------- Empty states ---------------- */
+.empty-state {
+  text-align: center;
+  padding: 56px 20px;
+  color: var(--slate);
+}
+.empty-state i { font-size: 2.2rem; color: var(--line); display: block; margin-bottom: 10px; }
+
+/* ---------------- Photo preview in modal ---------------- */
+.photo-preview-wrap { display: flex; justify-content: center; }
+.photo-preview {
+  width: 96px; height: 96px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid var(--gold);
+}
+.photo-preview-placeholder {
+  width: 96px; height: 96px;
+  border-radius: 10px;
+  border: 2px dashed var(--line);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  color: var(--line);
+  background: var(--parchment);
+}
+
+/* ---------------- Loading overlay ---------------- */
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(19,31,56,0.55);
+  z-index: 1090;
+  display: flex; align-items: center; justify-content: center;
+}
+.loading-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 28px 36px;
+  text-align: center;
+  color: var(--navy-deep);
+}
+.loading-box .spinner-border { color: var(--gold); }
+
+/* ---------------- Modal polish ---------------- */
+.modal-content { border-radius: 12px; border: none; }
+.modal-header { border-bottom: 1px solid var(--line); }
+.modal-footer { border-top: 1px solid var(--line); }
+.modal-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; }
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 576px) {
+  .registry-subtitle { display: none; }
+  .stat-pill { padding: 5px 12px; }
+}
