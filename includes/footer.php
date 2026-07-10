@@ -1,5 +1,6 @@
     <div class="text-center text-muted small mt-5">
-        &copy; <?php echo date('Y'); ?> Student Management System — Built with PHP, MySQL &amp; Bootstrap 5
+        &copy; <?php echo date('Y'); ?> Student Management System — Built with PHP, MySQL &amp; Bootstrap 5<br>
+        Development by Anwarul Islam Anik
     </div>
 </div><!-- /.page-wrap -->
 
