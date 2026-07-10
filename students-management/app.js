@@ -14,7 +14,7 @@ const state = {
   students: [],       // full list loaded from database.json
   dbSha: null,         // current sha of students/database.json (null if file doesn't exist yet)
   filtered: [],         // list currently rendered (after search filter)
-  editingRoll: null,     // roll of the student being edited (null when adding)
+  editingId: null,      // id of the student being edited (null when adding)
   pendingPhotoFile: null,  // File object selected in the form, or null
   photoRemoved: false,    // true if user is clearing the photo on edit
   deleteTarget: null,     // student object queued for deletion
@@ -40,6 +40,7 @@ const els = {
   studentModalEl: document.getElementById("studentModal"),
   studentModalTitle: document.getElementById("studentModalTitle"),
   studentForm: document.getElementById("studentForm"),
+  editingId: document.getElementById("editingId"),
   originalRoll: document.getElementById("originalRoll"),
   existingPhotoPath: document.getElementById("existingPhotoPath"),
   nameInput: document.getElementById("nameInput"),
@@ -211,6 +212,8 @@ async function loadStudents() {
       state.students = jsonText ? JSON.parse(jsonText) : [];
       state.dbSha = file.sha;
     }
+    // Backfill ids for any legacy records saved before the id field existed.
+    ensureAllHaveIds();
     setSyncStatus(true);
     applySearchFilter();
   } catch (err) {
@@ -219,6 +222,32 @@ async function loadStudents() {
   } finally {
     setLoading(false);
   }
+}
+
+/**
+ * Returns the next available auto-increment id (max existing id + 1).
+ */
+function nextId() {
+  const max = state.students.reduce((m, s) => Math.max(m, Number(s.id) || 0), 0);
+  return max + 1;
+}
+
+/**
+ * Ensures every record in state.students has a numeric id.
+ * Runs once after load to migrate older database.json files
+ * that were saved without an id field.
+ */
+function ensureAllHaveIds() {
+  let changed = false;
+  let running = state.students.reduce((m, s) => Math.max(m, Number(s.id) || 0), 0);
+  for (const s of state.students) {
+    if (!s.id) {
+      running += 1;
+      s.id = running;
+      changed = true;
+    }
+  }
+  return changed;
 }
 
 /**
@@ -341,7 +370,8 @@ function resetForm() {
   els.rollInput.disabled = false;
   state.pendingPhotoFile = null;
   state.photoRemoved = false;
-  state.editingRoll = null;
+  state.editingId = null;
+  els.editingId.value = "";
   els.originalRoll.value = "";
   els.existingPhotoPath.value = "";
 }
@@ -355,7 +385,8 @@ function openAddModal() {
 function openEditModal(student) {
   resetForm();
   els.studentModalTitle.textContent = "Edit Student";
-  state.editingRoll = student.roll;
+  state.editingId = student.id;
+  els.editingId.value = student.id;
   els.originalRoll.value = student.roll;
   els.existingPhotoPath.value = student.photo || "";
 
@@ -412,9 +443,9 @@ els.photoInput.addEventListener("change", () => {
  * Form validation
  * ---------------------------------------------------------------------- */
 
-function isRollTaken(roll, excludeRoll) {
+function isRollTaken(roll, excludeId) {
   return state.students.some(
-    (s) => String(s.roll).toLowerCase() === String(roll).toLowerCase() && String(s.roll) !== String(excludeRoll)
+    (s) => String(s.roll).toLowerCase() === String(roll).toLowerCase() && String(s.id) !== String(excludeId)
   );
 }
 
@@ -433,7 +464,7 @@ function validateForm() {
     els.rollError.textContent = "Roll is required.";
     els.rollInput.classList.add("is-invalid");
     valid = false;
-  } else if (isRollTaken(roll, state.editingRoll)) {
+  } else if (isRollTaken(roll, state.editingId)) {
     els.rollError.textContent = "This roll number is already in use.";
     els.rollInput.classList.add("is-invalid");
     valid = false;
@@ -455,11 +486,12 @@ els.studentForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   if (!validateForm()) return;
 
-  const isEdit = Boolean(state.editingRoll);
+  const isEdit = Boolean(state.editingId);
   const name = els.nameInput.value.trim();
   const roll = els.rollInput.value.trim();
   const klass = els.classInput.value.trim();
   const oldPhotoPath = els.existingPhotoPath.value || null;
+  const oldRoll = els.originalRoll.value || null;
 
   els.btnSaveStudent.disabled = true;
   setLoading(true, isEdit ? "Updating student…" : "Adding student…");
@@ -485,26 +517,26 @@ els.studentForm.addEventListener("submit", async (e) => {
         const oldFile = await getFile(oldPhotoPath);
         if (oldFile) await deleteFile(oldPhotoPath, oldFile.sha, `Remove stale photo for roll ${roll}`);
       }
-    } else if (isEdit && oldPhotoPath && roll !== state.editingRoll) {
+    } else if (isEdit && oldPhotoPath && roll !== oldRoll) {
       // Roll changed but no new photo chosen — rename existing photo to match new roll
       const newPhotoPath = `${CONFIG.PHOTOS_PATH}/${roll}.jpg`;
       const oldFile = await getFile(oldPhotoPath);
       if (oldFile) {
         await putFile(newPhotoPath, oldFile.contentBase64, `Rename photo for roll ${roll}`, null);
-        await deleteFile(oldPhotoPath, oldFile.sha, `Remove old photo for roll ${state.editingRoll}`);
+        await deleteFile(oldPhotoPath, oldFile.sha, `Remove old photo for roll ${oldRoll}`);
         photoPath = newPhotoPath;
       }
     }
 
     if (isEdit) {
-      const idx = state.students.findIndex((s) => String(s.roll) === String(state.editingRoll));
+      const idx = state.students.findIndex((s) => String(s.id) === String(state.editingId));
       if (idx !== -1) {
-        state.students[idx] = { name, roll, class: klass, photo: photoPath };
+        state.students[idx] = { id: state.students[idx].id, name, roll, class: klass, photo: photoPath };
       }
       await saveDatabase(`Update student ${roll} — ${name}`);
       showToast("success", "Student updated", `${name} was updated successfully.`);
     } else {
-      state.students.push({ name, roll, class: klass, photo: photoPath });
+      state.students.push({ id: nextId(), name, roll, class: klass, photo: photoPath });
       await saveDatabase(`Add student ${roll} — ${name}`);
       showToast("success", "Student added", `${name} was added to the registry.`);
     }
@@ -546,7 +578,7 @@ els.btnConfirmDelete.addEventListener("click", async () => {
       }
     }
 
-    state.students = state.students.filter((s) => String(s.roll) !== String(student.roll));
+    state.students = state.students.filter((s) => String(s.id) !== String(student.id));
     await saveDatabase(`Delete student ${student.roll} — ${student.name}`);
 
     showToast("success", "Student removed", `${student.name} was removed from the registry.`);
